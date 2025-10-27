@@ -11,6 +11,7 @@ import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createIssueSchema } from "@/app/validationSchema";
 import {z} from 'zod';
+import ErrorMessage from "@/app/components/ErrorMessage";
 
 type IssueForm = z.infer<typeof createIssueSchema>;
 
@@ -48,9 +49,10 @@ const NewIssuePage = () => {
           {...register("title")}
           placeholder="Enter issue title..."
         />
-        {errors.title && <Text color="red">{errors.title.message}
-            </Text>}
-     
+        
+            <ErrorMessage>
+                {errors.title?.message}
+            </ErrorMessage>
 
       {/* Description editor */}
       <Controller
@@ -60,8 +62,10 @@ const NewIssuePage = () => {
           <SimpleMDE {...field} placeholder="Description..." />
         )}
       />
-      {errors.descriptione && <Text color="red">{errors.title.description}
-            </Text>}
+       <ErrorMessage>
+                {errors.description?.message}
+            </ErrorMessage>
+      
 
       <Button type="submit">Submit New Issue</Button>
     </form>
