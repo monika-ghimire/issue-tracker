@@ -2,21 +2,23 @@
 
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
-import { TextField, Button, Callout } from "@radix-ui/themes";
+import { TextField, Button, Callout , Text } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createIssueSchema } from "@/app/validationSchema";
+import {z} from 'zod';
 
-interface IssueForm {
-  title: string;
-  description: string;
-}
+type IssueForm = z.infer<typeof createIssueSchema>;
 
 const NewIssuePage = () => {
   const router = useRouter();
-  const { register, control, handleSubmit } = useForm<IssueForm>();
+  const { register, control, handleSubmit , formState: { errors} } = useForm<IssueForm>({
+    resolver : zodResolver(createIssueSchema)
+  });
   const [error, setError] = useState("");
 
   return (
@@ -46,6 +48,8 @@ const NewIssuePage = () => {
           {...register("title")}
           placeholder="Enter issue title..."
         />
+        {errors.title && <Text color="red">{errors.title.message}
+            </Text>}
      
 
       {/* Description editor */}
@@ -56,6 +60,8 @@ const NewIssuePage = () => {
           <SimpleMDE {...field} placeholder="Description..." />
         )}
       />
+      {errors.descriptione && <Text color="red">{errors.title.description}
+            </Text>}
 
       <Button type="submit">Submit New Issue</Button>
     </form>
