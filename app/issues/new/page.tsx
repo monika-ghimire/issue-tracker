@@ -2,7 +2,7 @@
 
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
-import { TextField, Button, Callout , Text } from "@radix-ui/themes";
+import { TextField, Button, Callout, Text } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -10,30 +10,34 @@ import { useState } from "react";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createIssueSchema } from "@/app/validationSchema";
-import {z} from 'zod';
+import { z } from "zod";
 import ErrorMessage from "@/app/components/ErrorMessage";
 
 type IssueForm = z.infer<typeof createIssueSchema>;
 
 const NewIssuePage = () => {
   const router = useRouter();
-  const { register, control, handleSubmit , formState: { errors} } = useForm<IssueForm>({
-    resolver : zodResolver(createIssueSchema)
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IssueForm>({
+    resolver: zodResolver(createIssueSchema),
   });
   const [error, setError] = useState("");
 
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      await axios.post("/api/issues", data);
+      router.push("/issues");
+    } catch (error) {
+      setError("An unexpected error occurred.");
+    }
+  });
+
   return (
-    <form
-      className="max-w-xl space-y-4"
-      onSubmit={handleSubmit(async (data) => {
-        try {
-          await axios.post("/api/issues", data);
-          router.push("/issues");
-        } catch (error) {
-          setError("An unexpected error occurred.");
-        }
-      })}
-    >
+    <form className="max-w-xl space-y-4" onSubmit={onSubmit}>
       {/* ✅ Error callout */}
       {error && (
         <Callout.Root color="red" variant="soft">
@@ -44,15 +48,9 @@ const NewIssuePage = () => {
         </Callout.Root>
       )}
 
-     
-      <input
-          {...register("title")}
-          placeholder="Enter issue title..."
-        />
-        
-            <ErrorMessage>
-                {errors.title?.message}
-            </ErrorMessage>
+      <input {...register("title")} placeholder="Enter issue title..." />
+
+      <ErrorMessage>{errors.title?.message}</ErrorMessage>
 
       {/* Description editor */}
       <Controller
@@ -62,10 +60,7 @@ const NewIssuePage = () => {
           <SimpleMDE {...field} placeholder="Description..." />
         )}
       />
-       <ErrorMessage>
-                {errors.description?.message}
-            </ErrorMessage>
-      
+      <ErrorMessage>{errors.description?.message}</ErrorMessage>
 
       <Button type="submit">Submit New Issue</Button>
     </form>
